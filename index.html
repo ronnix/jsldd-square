@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Square</title>
+    <style type="text/css">
+        body {
+            display: flex;
+            background-image: url(amiga.jpg);  /* Credits: https://commons.wikimedia.org/wiki/File:Amiga_A1000_IMG_4284.jpg */
+        }
+        #canvas {
+            background-color: black;
+            border-radius: 40px;
+            opacity: 0.5;
+            position: absolute;
+            width: 710px;
+            height: 520px;
+            left: 560px;
+            top: 128px;
+            imageRendering: pixelated;
+        }
+        p {
+            font-size: small;
+            color: #9D9780;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="320" height="256"></canvas>
+    <script type="text/javascript">
+
+        var canvas = document.getElementById('canvas');
+        width = parseInt(canvas.getAttribute("width"));
+        height = parseInt(canvas.getAttribute("height"));
+
+        function clearScreen(context) {
+            context.fillStyle = 'black';
+            context.fillRect(0, 0, width, height);
+        }
+
+        function drawShape(context, points, color) {
+            context.strokeStyle = color;
+            context.beginPath();
+            points.map(function (point) {
+                context.lineTo(point.x, point.y);
+            });
+            context.lineTo(points[0].x, points[0].y);
+            context.stroke();
+        }
+
+        function rotatePoint(point, center, angle) {
+            const radians = (Math.PI / 180) * angle,
+                  cos = Math.cos(radians),
+                  sin = Math.sin(radians);
+            return {
+                x: (cos * (point.x - center.x)) + (sin * (point.y - center.y)) + center.x,
+                y: (cos * (point.y - center.y)) - (sin * (point.x - center.x)) + center.y,
+            };
+        }
+
+        function rotateShape(points, center, angle) {
+            return points.map(function (point) {
+                return rotatePoint(point, center, angle);
+            });
+        }
+
+        function makeSquare(center, size) {
+            return [
+                {x: center.x - size, y: center.y - size},
+                {x: center.x + size, y: center.y - size},
+                {x: center.x + size, y: center.y + size},
+                {x: center.x - size, y: center.y + size},
+            ];
+        }
+
+        if (canvas.getContext) {
+            var context = canvas.getContext('2d');
+
+            var center = {
+                x: width / 2,
+                y: height / 2,
+            };
+
+            var shape = makeSquare(center, 60);
+
+            var angle = 0;
+            function loop() {
+                clearScreen(context);
+                points = rotateShape(shape, center, angle);
+                drawShape(context, points, 'white');
+                angle = (angle + 1) % 360;
+            }
+            setInterval(loop, 20);
+            loop();
+        }
+    </script>
+</body>
+</html>
